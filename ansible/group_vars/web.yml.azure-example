@@ -1,0 +1,21 @@
+---
+# Repository and Path Variables
+app_repo: "https://github.com/pravinmishraaws/theepicbook"
+app_dest: "/var/www/epicbook"
+
+# User and Permissions
+app_user: "www-data"
+app_group: "www-data"
+
+# Nginx Configuration
+server_name: "_"
+
+# Database Configuration
+# After terraform apply, run: terraform -chdir=terraform/azure output mysql_fqdn
+# Use the endpoint WITHOUT the :3306 port suffix for db_host
+db_host: "<UPDATE_WITH_MYSQL_FQDN>"
+db_port: 3306
+db_name: "bookstore"
+db_user: "adminuser"
+db_pass: "<UPDATE_WITH_MYSQL_PASSWORD>"
+db_dialect: "mysql"
