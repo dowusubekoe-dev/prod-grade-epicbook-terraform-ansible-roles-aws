@@ -1,0 +1,90 @@
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: infra
+      source: infra-epicbook.git
+      trigger: true
+
+variables:
+  - group: epicbook-secrets
+
+pool:
+  name: 'SelfHostedPool'
+
+steps:
+  - checkout: self
+    displayName: 'Checkout repository'
+
+  - download: infra
+    artifact: infra-outputs
+    displayName: 'Download infra outputs artifact'
+
+  - script: |
+      set -e
+
+      echo "Downloaded artifact contents:"
+      ls -R "$(Pipeline.Workspace)"
+
+      source "$(Pipeline.Workspace)/infra/infra-outputs/infra-outputs.env"
+
+      echo "##vso[task.setvariable variable=vmPublicIp]$vmPublicIp"
+      echo "##vso[task.setvariable variable=db_host]$db_host"
+
+      echo "VM IP: $vmPublicIp"
+      echo "DB Host: $db_host"
+    displayName: 'Load infra outputs'
+
+  - task: DownloadSecureFile@1
+    name: sshPrivateKey
+    displayName: 'Download SSH private key'
+    inputs:
+      secureFile: 'id_rsa'
+
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y ansible sshpass
+    displayName: 'Install Ansible'
+
+  - script: |
+      mkdir -p ~/.ssh
+      cp "$(sshPrivateKey.secureFilePath)" ~/.ssh/id_rsa
+      chmod 600 ~/.ssh/id_rsa
+      ls -l ~/.ssh
+    displayName: 'Prepare SSH private key'
+
+  - script: |
+      cat > inventory.ini <<EOF
+      [web]
+      $(vmPublicIp)
+
+      [web:vars]
+      ansible_user=azureuser
+      ansible_connection=ssh
+      ansible_ssh_private_key_file=$HOME/.ssh/id_rsa
+      ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+      ansible_python_interpreter=/usr/bin/python3
+      EOF
+
+      echo "Generated inventory:"
+      cat inventory.ini
+    displayName: 'Generate inventory.ini'
+
+  - script: |
+      ansible all -m ping
+    displayName: 'Test Ansible connectivity'
+
+  - script: |
+      ansible-playbook site.yml \
+        -e "db_host=$(db_host)" \
+        -e "db_password=$(db_password)"
+    displayName: 'Run Ansible playbook'
+
+  - script: |
+      set -e
+      echo "========================================="
+      echo "App URL: http://$(vmPublicIp)"
+      echo "========================================="
+      curl -I --max-time 20 http://$(vmPublicIp)
+      curl --max-time 20 http://$(vmPublicIp) | head
+    displayName: 'Verify deployment Url and Nginx'
