@@ -91,5 +91,5 @@ collections/ansible_collections/*/*/tests/output/
 .env
 .env.*
 misc
-CLAUDE
+CLAUDE.md
 
