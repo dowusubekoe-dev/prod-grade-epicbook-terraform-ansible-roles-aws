@@ -23,11 +23,11 @@ A production-grade deployment of the [EpicBook](https://github.com/pravinmishraa
                         │  │  │ │Ubuntu  │ │ │ │db.t3.mic│ │  │   │
                         │  │  │ └────────┘ │ │ └─────────┘ │  │   │
                         │  │  └────────────┘ └─────────────┘  │   │
-                        │  │         │              │          │   │
-                        │  │    SG: 22,80      SG: 3306        │   │
-                        │  │    (public)     (from EC2 only)   │   │
+                        │  │         │              │         │   │
+                        │  │    SG: 22,80      SG: 3306       │   │
+                        │  │    (public)     (from EC2 only)  │   │
                         │  │                                  │   │
-                        │  │         Internet Gateway          │   │
+                        │  │         Internet Gateway         │   │
                         │  └──────────────────────────────────┘   │
                         └─────────────────────────────────────────┘
                                         │
