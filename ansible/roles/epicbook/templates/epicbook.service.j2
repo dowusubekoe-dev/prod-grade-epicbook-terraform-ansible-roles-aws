@@ -1,0 +1,31 @@
+[Unit]
+Description=EpicBook Node.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/epicbook
+Environment=NODE_ENV=production
+Restart=always
+RestartSec=10
+
+# The "Hammer": Define variables directly in the ExecStart line as well
+
+ExecStart=/usr/bin/env \
+  DB_HOST={{ db_host }} \
+  DB_HOSTNAME={{ db_host }} \
+  MYSQL_HOST={{ db_host }} \
+  DB_USER={{ db_user }} \
+  DB_PASS={{ db_pass }} \
+  DB_PASSWORD={{ db_pass }} \
+  DB_NAME={{ db_name }} \
+  DB_DATABASE={{ db_name }} \
+  PORT=3000 \
+  /usr/bin/node /var/www/epicbook/server.js
+
+
+
+[Install]
+WantedBy=multi-user.target

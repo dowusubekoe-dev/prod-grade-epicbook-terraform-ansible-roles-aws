@@ -1,0 +1,93 @@
+# =========================
+# Ansible Sensitive Files
+# =========================
+*.retry
+*.vault
+vault.yml
+vault.yaml
+group_vars/*vault*
+host_vars/*vault*
+
+# group_vars/web.yml contains real DB credentials and RDS endpoint — never commit
+ansible/group_vars/web.yml
+
+# Private keys / SSH
+*.pem
+*.key
+*.pub
+id_rsa
+id_dsa
+
+# =========================
+# Inventory & Overrides
+# =========================
+inventory.ini
+inventory
+hosts
+hosts.ini
+
+# If you use dynamic inventory configs locally
+*.aws_ec2.yaml
+*.azure_rm.yaml
+
+# =========================
+# Logs & Temp Files
+# =========================
+*.log
+logs/
+tmp/
+*.retry
+
+# =========================
+# Python / Virtual Env
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env/
+.venv/
+
+# =========================
+# Editor / OS Files
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# =========================
+# Ansible Galaxy / Roles
+# =========================
+roles/*/tests/output/
+collections/ansible_collections/*/*/tests/output/
+
+# Optional: ignore downloaded roles/collections
+# Uncomment if you install via requirements.yml
+# roles/
+# collections/
+
+# =========================
+# Terraform (if co-located)
+# =========================
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+.terraform.tfvars
+*.tfvars
+
+# =========================
+# MCP / Local Config (your case)
+# =========================
+.mcp.json
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+misc

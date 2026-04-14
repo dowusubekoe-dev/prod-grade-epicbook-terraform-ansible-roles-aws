@@ -1,0 +1,87 @@
+---
+- name: Ensure /var/www directory exists
+  file:
+    path: /var/www
+    state: directory
+    mode: '0755'
+
+- name: Install Node.js, npm, MySQL client, and Python MySQL bridge
+  apt:
+    name:
+      - nodejs
+      - npm
+      - python3-pymysql
+      - default-mysql-client
+    state: present
+    update_cache: yes
+
+- name: Add EpicBook directory to Git safe directories
+  command: "git config --system --add safe.directory {{ app_dest }}"
+  changed_when: false
+
+- name: Clone the EpicBook repository
+  git:
+    repo: "{{ app_repo }}"
+    dest: "{{ app_dest }}"
+    version: main
+    force: yes
+
+- name: Install Node.js dependencies
+  npm:
+    path: "{{ app_dest }}"
+    state: present
+
+- name: Deploy database configuration
+  template:
+    src: config.json.j2
+    dest: "{{ app_dest }}/config/config.json"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0640'
+
+- name: Check if Author table exists
+  shell: >
+    mysql -h {{ db_host }} -u {{ db_user }} -p'{{ db_pass }}' {{ db_name }}
+    -e "SHOW TABLES LIKE 'Author'" --skip-column-names 2>/dev/null
+  register: table_exists
+  changed_when: false
+
+- name: Import database schema
+  shell: "mysql -h {{ db_host }} -u {{ db_user }} -p'{{ db_pass }}' {{ db_name }} < {{ app_dest }}/db/BuyTheBook_Schema.sql"
+  when: table_exists.stdout | trim == ''
+
+- name: Check if books exist in database
+  shell: >
+    mysql -h {{ db_host }} -u {{ db_user }} -p'{{ db_pass }}' {{ db_name }}
+    -e "SELECT COUNT(*) FROM Book" --skip-column-names 2>/dev/null || echo "0"
+  register: book_count
+  changed_when: false
+
+- name: Import author seed data
+  shell: "mysql -h {{ db_host }} -u {{ db_user }} -p'{{ db_pass }}' {{ db_name }} < {{ app_dest }}/db/author_seed.sql"
+  when: book_count.stdout | trim == '0'
+
+- name: Import books seed data
+  shell: "mysql -h {{ db_host }} -u {{ db_user }} -p'{{ db_pass }}' {{ db_name }} < {{ app_dest }}/db/books_seed.sql"
+  when: book_count.stdout | trim == '0'
+
+- name: Set ownership of app directory
+  file:
+    path: "{{ app_dest }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    recurse: yes
+
+- name: Setup EpicBook systemd service
+  template:
+    src: epicbook.service.j2
+    dest: /etc/systemd/system/epicbook.service
+  notify: restart epicbook
+
+- name: Start and enable EpicBook service
+  service:
+    name: epicbook
+    state: started
+    enabled: yes
+    daemon_reload: yes

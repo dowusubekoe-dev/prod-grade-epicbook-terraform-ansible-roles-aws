@@ -1,0 +1,19 @@
+[Unit]
+Description=EpicBook Node.js Application
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/epicbook
+# These Environment lines bridge the gap to your RDS
+Environment=DB_HOST={{ db_host }}
+Environment=DB_USER={{ db_user }}
+Environment=DB_PASS={{ db_pass }}
+Environment=DB_NAME={{ db_name }}
+Environment=PORT=3000
+ExecStart=/usr/bin/node /var/www/epicbook/server.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

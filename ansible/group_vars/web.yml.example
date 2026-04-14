@@ -1,0 +1,23 @@
+---
+# Copy this file to web.yml and fill in your values.
+# web.yml is gitignored — never commit it with real credentials.
+
+# Repository and Path Variables
+app_repo: "https://github.com/pravinmishraaws/theepicbook"
+app_dest: "/var/www/epicbook"
+
+# User and Permissions
+app_user: "www-data"
+app_group: "www-data"
+
+# Nginx Configuration
+server_name: "_"
+
+# Database Configuration
+# Get db_host from: terraform output rds_endpoint  (strip the :3306 suffix)
+db_host: "<rds-endpoint>.rds.amazonaws.com"
+db_port: 3306
+db_name: "bookstore"
+db_user: "adminuser"
+db_pass: "<your-db-password>"
+db_dialect: "mysql"
